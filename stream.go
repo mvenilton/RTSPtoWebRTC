@@ -27,6 +27,7 @@ func RTSPWorkerLoop(name, url string, OnDemand, DisableAudio, Debug bool) {
 		log.Println("Stream Try Connect", name)
 		err := RTSPWorker(name, url, OnDemand, DisableAudio, Debug)
 		if err != nil {
+			Config.StreamChannelStatus(name, 0)
 			log.Println(err)
 			Config.LastError = err
 		}
@@ -45,6 +46,7 @@ func RTSPWorker(name, url string, OnDemand, DisableAudio, Debug bool) error {
 	if err != nil {
 		return err
 	}
+	Config.StreamChannelStatus(name, 1)
 	defer RTSPClient.Close()
 	if RTSPClient.CodecData != nil {
 		Config.coAd(name, RTSPClient.CodecData)

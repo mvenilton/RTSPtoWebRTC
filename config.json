@@ -1,13 +1,15 @@
 {
   "server": {
-    "http_port": ":8083",
-    "ice_servers": ["stun:stun.l.google.com:19302"]
+    "http_port": ":1080",
+    "ice_servers": [
+      "stun:stun.l.google.com:19302"
+    ]
   },
   "streams": {
-    "H264_AAC": {
+    "1": {
       "on_demand": false,
       "disable_audio": true,
-      "url": "rtsp://171.25.232.136/5090ea43a82340e0b6ee75a5c41e08c4"
+      "url": "rtsp://admin:intelligence04@10.10.26.120/cam/realmonitor?channel=13&subtype=1"
     }
   }
 }

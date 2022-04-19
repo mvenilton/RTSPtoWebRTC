@@ -14,6 +14,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+//Message resp struct
+type Message struct {
+	Status  int         `json:"status"`
+	Payload interface{} `json:"payload"`
+}
+
 type JCodec struct {
 	Type string
 }
@@ -32,6 +38,7 @@ func serveHTTP() {
 	router.POST("/stream/receiver/:uuid", HTTPAPIServerStreamWebRTC)
 	router.GET("/stream/codec/:uuid", HTTPAPIServerStreamCodec)
 	router.POST("/stream", HTTPAPIServerStreamWebRTC2)
+	router.GET("/stream/info/:uuid", HTTPAPIServerStreamChannelInfo)
 
 	router.StaticFS("/static", http.Dir("web/static"))
 	err := router.Run(Config.Server.HTTPPort)
@@ -59,6 +66,12 @@ func HTTPAPIServerIndex(c *gin.Context) {
 func HTTPAPIServerStreamPlayer(c *gin.Context) {
 	_, all := Config.list()
 	sort.Strings(all)
+
+	suuid := c.Param("uuid")
+
+	camera := Config.Streams[suuid].Status
+	log.Println("Camera Info ", camera)
+
 	c.HTML(http.StatusOK, "player.tmpl", gin.H{
 		"port":     Config.Server.HTTPPort,
 		"suuid":    c.Param("uuid"),
@@ -265,4 +278,14 @@ func HTTPAPIServerStreamWebRTC2(c *gin.Context) {
 			}
 		}
 	}()
+}
+
+//HTTPAPIServerStreamChannelInfo function return stream info struct
+func HTTPAPIServerStreamChannelInfo(c *gin.Context) {
+	info, err := Config.StreamChannelInfo(c.Param("uuid"))
+	if err != nil {
+		c.IndentedJSON(500, Message{Status: 0, Payload: err.Error()})
+		return
+	}
+	c.IndentedJSON(200, Message{Status: 1, Payload: info})
 }

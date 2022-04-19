@@ -9,10 +9,15 @@ import (
 	"log"
 	"sync"
 	"time"
+	"errors"
 
 	"github.com/deepch/vdk/codec/h264parser"
 
 	"github.com/deepch/vdk/av"
+)
+
+var (
+	ErrorStreamNotFound             = errors.New("stream not found")
 )
 
 //Config global
@@ -39,7 +44,7 @@ type ServerST struct {
 //StreamST struct
 type StreamST struct {
 	URL          string `json:"url"`
-	Status       bool   `json:"status"`
+	Status       int    `json:"status"`
 	OnDemand     bool   `json:"on_demand"`
 	DisableAudio bool   `json:"disable_audio"`
 	Debug        bool   `json:"debug"`
@@ -238,4 +243,21 @@ func pseudoUUID() (uuid string) {
 	}
 	uuid = fmt.Sprintf("%X-%X-%X-%X-%X", b[0:4], b[4:6], b[6:8], b[8:10], b[10:])
 	return
+}
+
+func (element *ConfigST) StreamChannelStatus(suuid string, status int) {
+	element.mutex.Lock()
+	defer element.mutex.Unlock()
+	t := element.Streams[suuid]
+	t.Status = status
+	element.Streams[suuid] = t
+}
+
+func (element *ConfigST) StreamChannelInfo(suuid string) (*StreamST, error) {
+	element.mutex.Lock()
+	defer element.mutex.Unlock()
+	if channelTmp, ok := element.Streams[suuid]; ok {
+		return &channelTmp, nil
+	}
+	return nil, ErrorStreamNotFound
 }
